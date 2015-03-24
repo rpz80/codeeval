@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <assert.h>
 #include <time.h>
 
 #define ROOM_SIZE 10
@@ -46,4 +45,6 @@ int main(int argc, const char* argv[]) {
   }
 
   printf("Elapsed: %.3fs\n", (double)(clock() - start)/ CLOCKS_PER_SEC);
+
+  return 0;
 };
