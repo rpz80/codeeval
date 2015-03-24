@@ -13,12 +13,9 @@ struct buf_t {
 
 static struct buf_t primes;
 
-int is_prime(uint8_t num) 
-{
-  for (uint8_t i = 0; i < primes.count; ++i) 
-  {
-    if (num == primes.buf[i]) 
-    {
+int is_prime(uint8_t num) {
+  for (uint8_t i = 0; i < primes.count; ++i) {
+    if (num == primes.buf[i]) {
       return 1;
     }
   }

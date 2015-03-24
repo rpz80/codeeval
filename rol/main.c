@@ -4,7 +4,8 @@
 
 #define ROOM_SIZE 10
 
-void process(const char* room) {
+void process(const char* room)
+{
   for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
     for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
       printf("%-1c", room[i*ROOM_SIZE + j]);
@@ -13,7 +14,8 @@ void process(const char* room) {
   }
 }
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[])
+{
   time_t start = clock();
   if (argc < 2) {
     printf("Usage: %s <file>\n", argv[0]);
