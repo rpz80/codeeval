@@ -93,6 +93,7 @@ int main(int argc, const char* argv[]) {
 
   char fcontent[fsize + 1];
   fread(fcontent, 1, fsize, f);
+  fclose(f);
   fcontent[fsize] = '\0';
   char* pfc = fcontent;
 
