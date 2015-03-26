@@ -92,41 +92,139 @@ void try_reflect(struct ray* r, char* room) {
     case NW: {
       if (r->cur_cell.row - 1 == 0 && r->cur_cell.col - 1 == 0)
         return;
-      r->dir = NE;
-      r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
-      ++r->steps;
-      *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
-      advance(r, room);
-      // TODO: different reflects for different walls
+      if (r->cur_cell.col - 1 == 0) {
+        r->dir = NE;
+        r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+        advance(r, room);
+      }
+      else {
+        r->dir = SW;
+        r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+        advance(r, room);
+      }
       break;
     }
     
     case NE: {
       if (r->cur_cell.row - 1 == 0 && r->cur_cell.col + 1 == 9)
         return;
-      r->dir = NW;
-      r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
-      ++r->steps;
-      *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
-      advance(r, room);
+      if (r->cur_cell.col + 1 == 9) {
+        r->dir = NW;
+        r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        advance(r, room);
+      }
+      else {
+        r->dir = SE;
+        r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        advance(r, room);
+      }
       break;
     }
 
     case SW: {
       if (r->cur_cell.row + 1 == 9 && r->cur_cell.col - 1 == 0)
+        return;      
+      if (r->cur_cell.col - 1 == 0) {
+        r->dir = SE;
+        r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        advance(r, room);
+      }
+      else {
+        r->dir = NW;
+        r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        advance(r, room);
+      }
+      break;
+    }
+
+    case SE: {
+      if (r->cur_cell.row + 1 == 9 && r->cur_cell.col + 1 == 9)
         return;
-
-      r->dir = SE;
-      r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
-      ++r->steps;
-
-      *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
-
-      advance(r, room);
+      if (r->cur_cell.col + 1 == 9) {
+        r->dir = SW;
+        r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+        advance(r, room);
+      }
+      else {
+        r->dir = NE;
+        r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+        ++r->steps;
+        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+        advance(r, room);
+      }
       break;
     }
 
   };
+}
+
+void try_split(struct ray* r, char* room) {
+  assert(r);
+  assert(room);
+
+  switch (r->dir) {
+    case SE:
+    case NW: {
+      struct ray ray_NE;
+      init_ray2(&ray_NE, r->steps, NE, r->cur_cell);
+      advance(&ray_NE, room);
+
+      struct ray ray_SW;
+      init_ray2(&ray_SW, r->steps, SW, r->cur_cell);
+      advance(&ray_SW, room);
+    }
+      break;
+
+    case SW:
+    case NE: {
+      struct ray ray_NW;
+      init_ray2(&ray_NW, r->steps, NW, r->cur_cell);
+      advance(&ray_NW, room);
+
+      struct ray ray_SE;
+      init_ray2(&ray_SE, r->steps, SE, r->cur_cell);
+      advance(&ray_SE, room);
+    }
+      break;
+
+//    case SW: {
+//      struct ray ray_NW;
+//      init_ray2(&ray_NW, r->steps, NW, r->cur_cell);
+//      advance(&ray_NW, room);
+//
+//      struct ray ray_SE;
+//      init_ray2(&ray_SE, r->steps, SE, r->cur_cell);
+//      advance(&ray_SE, room);
+//    }
+
+//    case SE: {
+//      struct ray ray_NE;
+//      init_ray2(&ray_NE, r->steps, NE, r->cur_cell);
+//      advance(&ray_NE, room);
+//
+//      struct ray ray_SW;
+//      init_ray2(&ray_SW, r->steps, SW, r->cur_cell);
+//      advance(&ray_SW, room);
+//    }
+    default:
+      break;
+  };
+
+  advance(r, room);
 }
 
 void advance(struct ray* r, char* room) {
@@ -156,6 +254,8 @@ void advance(struct ray* r, char* room) {
           try_reflect(r, room);
           break;
         case '*':
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
           try_split(r, room);
           break;
         case '/':
@@ -185,6 +285,18 @@ void advance(struct ray* r, char* room) {
           break;
         case '#':
           break;
+        case '*':
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
+          try_split(r, room);
+          break;
+        case '\\':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
+          ++r->steps;
+          advance(r, room);
+          break;
         default:
           break;
       }
@@ -206,6 +318,18 @@ void advance(struct ray* r, char* room) {
           break;
         case '#':
           break;
+        case '*':
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+          try_split(r, room);
+          break;
+        case '\\':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+          ++r->steps;
+          advance(r, room);
+          break;
         default:
           break;
       }
@@ -226,6 +350,18 @@ void advance(struct ray* r, char* room) {
           advance(r, room);
           break;
         case '#':
+          break;
+        case '*':
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+          try_split(r, room);
+          break;
+        case '/':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+          ++r->steps;
+          advance(r, room);
           break;
         default:
           break;
