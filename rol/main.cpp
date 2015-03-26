@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <time.h>
 #include <assert.h>
 
@@ -48,12 +49,12 @@ struct ray* init_ray(const char* room, struct ray* r) {
     for(uint8_t j = 0; j < ROOM_SIZE; ++j) {
       switch (room[i*ROOM_SIZE + j]) {
         case '/':
-          r->cur_cell = (struct cell){i, j};
+          r->cur_cell = {i, j};
           Set_dir(i, SW, NE);
           Set_dir(j, NE, SW);
           break;
         case '\\':
-          r->cur_cell = (struct cell){i, j};
+          r->cur_cell = {i, j};
           Set_dir(i, SE, NW);
           Set_dir(j, SE, NW);
           break;
@@ -79,8 +80,8 @@ struct ray* init_ray2(struct ray* r, uint8_t steps,
 
 char* at(char* room, uint8_t row, uint8_t cell) {
   assert(room);
-  assert(row  > 0 && row  < ROOM_SIZE);
-  assert(cell > 0 && cell < ROOM_SIZE);
+  assert(row  >= 0 && row  < ROOM_SIZE);
+  assert(cell >= 0 && cell < ROOM_SIZE);
 
   return &room[row*ROOM_SIZE + cell];
 }
@@ -179,25 +180,29 @@ void try_split(struct ray* r, char* room) {
   switch (r->dir) {
     case SE:
     case NW: {
-      struct ray ray_NE;
-      init_ray2(&ray_NE, r->steps, NE, r->cur_cell);
-      advance(&ray_NE, room);
 
       struct ray ray_SW;
-      init_ray2(&ray_SW, r->steps, SW, r->cur_cell);
+      init_ray2(&ray_SW, /*r->steps*/0, SW, r->cur_cell);
       advance(&ray_SW, room);
+
+      struct ray ray_NE;
+      init_ray2(&ray_NE, /*r->steps*/0, NE, r->cur_cell);
+      advance(&ray_NE, room);
+
     }
       break;
 
     case SW:
     case NE: {
-      struct ray ray_NW;
-      init_ray2(&ray_NW, r->steps, NW, r->cur_cell);
-      advance(&ray_NW, room);
 
       struct ray ray_SE;
-      init_ray2(&ray_SE, r->steps, SE, r->cur_cell);
+      init_ray2(&ray_SE, /*r->steps*/0, SE, r->cur_cell);
       advance(&ray_SE, room);
+
+      struct ray ray_NW;
+      init_ray2(&ray_NW, /*r->steps*/0, NW, r->cur_cell);
+      advance(&ray_NW, room);
+
     }
       break;
 
@@ -224,6 +229,7 @@ void try_split(struct ray* r, char* room) {
       break;
   };
 
+  r->steps = 0;
   advance(r, room);
 }
 
@@ -233,15 +239,21 @@ void advance(struct ray* r, char* room) {
 
   if (r->steps == 20)
     return;
+  
+  uint8_t row = r->cur_cell.row;
+  uint8_t col = r->cur_cell.col;
 
   switch (r->dir) {
     case NW: {
+      if (row == 0 || col == 0)
+        return;
       char* next = at(room,
                       (uint8_t)(r->cur_cell.row - 1),
                       (uint8_t)(r->cur_cell.col - 1));
 
       switch (*next) {
         case ' ':
+        case '\\':
           *next = '\\';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
@@ -272,11 +284,15 @@ void advance(struct ray* r, char* room) {
     } // case NW
     
     case SW: {
+      if (row == 9 || col == 0)
+        return;
+
       char* next = at(room, (uint8_t)(r->cur_cell.row + 1),
                             (uint8_t)(r->cur_cell.col - 1));
 
       switch (*next) {
         case ' ':
+        case '/':
           *next = '/';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
@@ -284,6 +300,7 @@ void advance(struct ray* r, char* room) {
           advance(r, room);
           break;
         case '#':
+          try_reflect(r, room);
           break;
         case '*':
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
@@ -304,12 +321,16 @@ void advance(struct ray* r, char* room) {
     } //case SW
     
     case NE: {
+      if (row == 0 || col == 9)
+        return;
+
       char* next = at(room,
                       (uint8_t)(r->cur_cell.row - 1),
                       (uint8_t)(r->cur_cell.col + 1));
 
       switch (*next) {
         case ' ':
+        case '/':
           *next = '/';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
@@ -317,6 +338,7 @@ void advance(struct ray* r, char* room) {
           advance(r, room);
           break;
         case '#':
+          try_reflect(r, room);
           break;
         case '*':
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
@@ -337,12 +359,16 @@ void advance(struct ray* r, char* room) {
     } //case NE
     
     case SE: {
+      if (row == 9 || col == 9)
+        return;
+
       char* next = at(room,
                       (uint8_t)(r->cur_cell.row + 1),
                       (uint8_t)(r->cur_cell.col + 1));
 
       switch (*next) {
         case ' ':
+        case '\\':
           *next = '\\';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
@@ -350,6 +376,7 @@ void advance(struct ray* r, char* room) {
           advance(r, room);
           break;
         case '#':
+          try_reflect(r, room);
           break;
         case '*':
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
@@ -385,6 +412,11 @@ void process(char* room) {
     }
     printf("\n");
   }
+
+  for (uint8_t i = 0; i < ROOM_SIZE*ROOM_SIZE; ++i) {
+    printf("%c", room[i]);
+  }
+  printf("\n");
 }
 
 int main(int argc, const char* argv[]) {
@@ -404,7 +436,7 @@ int main(int argc, const char* argv[]) {
   uint32_t fsize = (uint32_t)ftell(f);
   fseek(f, 0, SEEK_SET);
 
-  char fcontent[fsize + 1];
+  char* fcontent = (char*)malloc(fsize + 1);
   fread(fcontent, 1, fsize, f);
   fcontent[fsize] = '\0';
   fclose(f);
@@ -418,6 +450,7 @@ int main(int argc, const char* argv[]) {
     }
   }
 
+  free(fcontent);
   printf("Elapsed: %.3fs\n", (double)(clock() - start)/ CLOCKS_PER_SEC);
 
   return 0;
