@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(ray_of_light)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
+if (MSVC)
+  add_definitions(
+	  -D_CRT_SECURE_NO_WARNINGS
+  )
+endif()
 
-set(SOURCE_FILES main.c)
+set(SOURCE_FILES main.cpp)
 add_executable(ray_of_light ${SOURCE_FILES})
