@@ -48,7 +48,7 @@ struct ray* init_ray(const char* room, struct ray* r) {
     for(uint8_t j = 0; j < ROOM_SIZE; ++j) {
       switch (room[i*ROOM_SIZE + j]) {
         case '/':
-          r->cur_cell = (struct cell){i, j};
+          r->cur_cell = {i, j};
           Set_dir(i, SW, NE);
           Set_dir(j, NE, SW);
           break;
