@@ -453,12 +453,12 @@ void process(char* room) {
   init_ray(room, &r);
   advance(&r, room);
 
-  //for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
-  //  for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
-  //    printf("%-1c", room[i*ROOM_SIZE + j]);
-  //  }
-  //  printf("\n");
-  //}
+  for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
+   for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
+     printf("%-1c", room[i*ROOM_SIZE + j]);
+   }
+   printf("\n");
+  }
 
   for (uint8_t i = 0; i < ROOM_SIZE*ROOM_SIZE; ++i) {
     printf("%c", room[i]);
