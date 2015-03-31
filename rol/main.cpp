@@ -21,7 +21,7 @@ struct cell {
 struct ray {
   uint8_t       steps;
   direction     dir;
-  struct cell   cur_cell;
+  cell   cur_cell;
 };
 
 
@@ -48,16 +48,20 @@ struct ray* init_ray(const char* room, struct ray* r) {
   for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
     for(uint8_t j = 0; j < ROOM_SIZE; ++j) {
       switch (room[i*ROOM_SIZE + j]) {
-        case '/':
-          r->cur_cell = {i, j};
+        case '/': {
+          cell c = {i, j};
+          r->cur_cell = c;
           Set_dir(i, SW, NE);
           Set_dir(j, NE, SW);
           break;
-        case '\\':
-          r->cur_cell = {i, j};
+                  }
+        case '\\':{
+          cell c = {i, j};
+          r->cur_cell = c;
           Set_dir(i, SE, NW);
           Set_dir(j, SE, NW);
           break;
+                  }
         default:
           break;
       }
@@ -97,14 +101,25 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = NE;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '/';
         advance(r, room);
       }
       else {
         r->dir = SW;
         r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '/';
         advance(r, room);
       }
       break;
@@ -117,14 +132,24 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = NW;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
         advance(r, room);
       }
       else {
         r->dir = SE;
         r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
         advance(r, room);
       }
       break;
@@ -137,14 +162,25 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = SE;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
         advance(r, room);
       }
       else {
         r->dir = NW;
         r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
         advance(r, room);
       }
       break;
@@ -157,14 +193,26 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = SW;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '/';
         advance(r, room);
       }
       else {
         r->dir = NE;
         r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
         ++r->steps;
-        *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+          *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
+        else
+          *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
+
+        //*at(room, r->cur_cell.row, r->cur_cell.col) = '/';
         advance(r, room);
       }
       break;
@@ -253,7 +301,7 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        case '\\':
+        //case '\\':
           *next = '\\';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
@@ -292,7 +340,7 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        case '/':
+        //case '/':
           *next = '/';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
@@ -330,7 +378,6 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        case '/':
           *next = '/';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
@@ -368,7 +415,7 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        case '\\':
+        //case '\\':
           *next = '\\';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
@@ -406,12 +453,12 @@ void process(char* room) {
   init_ray(room, &r);
   advance(&r, room);
 
-  for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
-    for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
-      printf("%-1c", room[i*ROOM_SIZE + j]);
-    }
-    printf("\n");
-  }
+  //for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
+  //  for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
+  //    printf("%-1c", room[i*ROOM_SIZE + j]);
+  //  }
+  //  printf("\n");
+  //}
 
   for (uint8_t i = 0; i < ROOM_SIZE*ROOM_SIZE; ++i) {
     printf("%c", room[i]);
