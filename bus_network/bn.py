@@ -22,14 +22,25 @@ def relax_start_node(start, g):
     for i in range(1, len(g)):
         if g[i][0][2] == start:
             g[i][0][0] = 0
+            break
             # row[0][3] = True
 
 
 def find_min_node(g):
-    min_node, dist = 1, g[1][0][0]
-    for i in range(2, len(g)):
-        if g[i][0][0] < g[min_node][0][0]:
+    min_node = None
+
+    for i in range(1, len(g)):
+        if g[i][0][0] != 100000 and not g[i][0][3]:
             min_node, dist = i, g[i][0][0]
+            break
+
+    if min_node is None:
+        return None
+
+    for i in range(min_node, len(g)):
+        if g[i][0][0] < g[min_node][0][0] and not g[i][0][3]:
+            min_node, dist = i, g[i][0][0]
+
     return min_node, dist
 
 
@@ -43,18 +54,18 @@ def find_siblings(n, g):
     result = []
     for j in range(1, len(g)):
         if j == n[0]:
-            for s in g[j][1:]:
-                if s != -1 and s != 1:
-                    ind, dist = find_node(g[0][j], g)
+            for k in range(1, len(g[j])):
+                if g[j][k] != -1 and g[j][k] != 1:
+                    ind, dist = find_node(g[0][k], g)
                     if not g[ind][0][3]:
-                        result.append((ind, dist + s))
+                        result.append((ind, n[1] + g[j][k]))
     return result
 
 
 def relax(siblings, g):
     for s in siblings:
-        if g[s[0]][0][1] > s[1]:
-            g[s[0]][0][1] = s[1]
+        if g[s[0]][0][0] > s[1]:
+            g[s[0]][0][0] = s[1]
 
 
 def find_stop(stop, siblings):
@@ -76,20 +87,28 @@ def mark_visited(n, g):
             g[i][0][3] = True
 
 
+def fill_results(stop, g, results):
+    for i in range(1, len(g)):
+        if g[i][0][2] == stop:
+            results.append(g[i][0][0])
+
+
 def find_shortest_path(g, start, stop):
     results = []
     relax_start_node(start, g)
     while 1:
         n = find_min_node(g)
+        if n is None:
+            break
         siblings = find_siblings(n, g)
-        if len(siblings) == 0:
-            return results
-        relax(siblings, g)
+        if len(siblings) != 0:
+            relax(siblings, g)
         mark_visited(n, g)
-        stop_node = find_stop(stop, siblings)
-        if stop_node is not None:
-            results.append(distance(stop_node, g))
 
+    fill_results(stop, g, results)
+    return results
+
+# TODO: process all starting points, Debug!
 
 def fill_graph(g):
     for i in range(1, len(g)):
