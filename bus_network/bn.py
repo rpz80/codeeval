@@ -19,22 +19,18 @@ def add_to_graph(g, stops, ind):
 
 
 def relax_start_node(start, g):
-    for i in range(1, len(g)):
-        if g[i][0][2] == start:
-            g[i][0][0] = 0
-            break
-            # row[0][3] = True
+    g[start][0][0] = 0
 
 
 def find_min_node(g):
-    min_node = None
+    min_node, dist = None, None
 
     for i in range(1, len(g)):
         if g[i][0][0] != 100000 and not g[i][0][3]:
             min_node, dist = i, g[i][0][0]
             break
 
-    if min_node is None:
+    if min_node is None or dist is None:
         return None
 
     for i in range(min_node, len(g)):
@@ -85,6 +81,7 @@ def mark_visited(n, g):
     for i in range(1, len(g)):
         if i == n[0]:
             g[i][0][3] = True
+            # print('{} -> '.format(g[i][0]), end='')
 
 
 def fill_results(stop, g, results):
@@ -93,35 +90,60 @@ def fill_results(stop, g, results):
             results.append(g[i][0][0])
 
 
+def find_start_nodes(g, start):
+    result = []
+    for i in range(1, len(g)):
+        if g[i][0][2] == start:
+            result.append(i)
+    return result
+
+
+def reset_graph(g):
+    for i in range(1, len(g)):
+        g[i][0][0] = 100000
+        g[i][0][3] = False
+
+
 def find_shortest_path(g, start, stop):
     results = []
-    relax_start_node(start, g)
-    while 1:
-        n = find_min_node(g)
-        if n is None:
-            break
-        siblings = find_siblings(n, g)
-        if len(siblings) != 0:
-            relax(siblings, g)
-        mark_visited(n, g)
+    start_nodes = find_start_nodes(g, start)
+    if len(start_nodes) == 0:
+        return
+    for node in start_nodes:
+        reset_graph(g)
+        # print('')
+        relax_start_node(node, g)
+        while 1:
+            n = find_min_node(g)
+            if n is None:
+                break
+            siblings = find_siblings(n, g)
+            if len(siblings) != 0:
+                relax(siblings, g)
+            mark_visited(n, g)
 
-    fill_results(stop, g, results)
+        fill_results(stop, g, results)
     return results
 
-# TODO: process all starting points, Debug!
 
 def fill_graph(g):
     for i in range(1, len(g)):
         for j in range(1, len(g[0])):
+            g[i].append(0)
+
+    for i in range(1, len(g)):
+        for j in range(1, len(g[0])):
             if i == j:
-                g[i].append(1)
-            else:
-                if g[i][0][1] == g[0][j][1] and abs(g[i][0][2] - g[0][j][2]) == 1:
-                    g[i].append(7)
-                elif g[i][0][2] == g[0][j][2]:
-                        g[i].append(12)
+                g[i][j] = 1
+                if j > 1 and g[0][j][1] == g[0][j-1][1]:
+                    g[i][j-1] = 7
+                if j < len(g[0]) - 1 and g[0][j][1] == g[0][j+1][1]:
+                    g[i][j+1] = 7
+            elif g[i][j] == 0:
+                if g[i][0][2] == g[0][j][2]:
+                        g[i][j] = 12
                 else:
-                    g[i].append(-1)
+                    g[i][j] = -1
 
 
 def main():
@@ -146,7 +168,12 @@ def main():
                 index += 1
 
             fill_graph(graph)
-            print(find_shortest_path(graph, start, stop))
+            min_path = min(find_shortest_path(graph, start, stop))
+
+            if min_path != 100000:
+                print(min_path)
+            else:
+                print('None')
 
 
 if __name__ == '__main__':
