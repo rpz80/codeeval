@@ -108,7 +108,7 @@ def find_shortest_path(g, start, stop):
     results = []
     start_nodes = find_start_nodes(g, start)
     if len(start_nodes) == 0:
-        return
+        return results
     for node in start_nodes:
         reset_graph(g)
         # print('')

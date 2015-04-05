@@ -48,6 +48,11 @@ type graph struct {
 	matrix adjacency_matrix
 }
 
+type resultStruct struct {
+	index  int
+	result uint
+}
+
 func newNode(route uint8, label uint) *node {
 	return &node{
 		route:   route,
@@ -159,12 +164,16 @@ func (g *graph) fillResults(stopLabel uint, results *[]uint) {
 	}
 }
 
-func (g *graph) findShortestPath(start, stop uint) {
+func (g *graph) findShortestPath(start, stop uint, stringNum int, c chan<- resultStruct) {
 	results := make([]uint, 0)
 	startNodes := g.findStartNodes(start)
 
 	if len(startNodes) == 0 {
-		fmt.Println("None")
+		//fmt.Println("None")
+		c <- resultStruct{
+			index:  stringNum,
+			result: 0}
+
 		return
 	}
 	for _, node := range startNodes {
@@ -194,14 +203,19 @@ func (g *graph) findShortestPath(start, stop uint) {
 			}
 		}
 		if minDist == max_dist {
-			fmt.Println("None")
+			//fmt.Println("None")
+			c <- resultStruct{
+				index:  stringNum,
+				result: 0}
 		} else {
-			fmt.Println(minDist)
+			c <- resultStruct{
+				index:  stringNum,
+				result: minDist}
 		}
 	}
 }
 
-func process(s string) {
+func process(s string, stringNum int, c chan<- resultStruct) {
 	splts := strings.Split(s, " ")
 
 	points_match := points_re.FindStringSubmatch(splts[0])
@@ -244,7 +258,7 @@ func process(s string) {
 		g.appendRoute(uint8(i), stops_int)
 	}
 	g.connectNodes()
-	g.findShortestPath(uint(start), uint(stop))
+	g.findShortestPath(uint(start), uint(stop), stringNum, c)
 }
 
 func main() {
@@ -262,8 +276,27 @@ func main() {
 	}
 
 	sc := bufio.NewScanner(f)
+
+	stringNum := 0
+	resultChan := make(chan resultStruct)
+
 	for sc.Scan() {
-		process(sc.Text())
+		go process(sc.Text(), stringNum, resultChan)
+		stringNum++
+	}
+	results := make([]uint, stringNum)
+
+	for i := 0; i < stringNum; i++ {
+		r := <-resultChan
+		results[r.index] = r.result
+	}
+
+	for _, v := range results {
+		if v == 0 {
+			fmt.Println("None")
+		} else {
+			fmt.Println(v)
+		}
 	}
 
 	t1 := time.Now()
