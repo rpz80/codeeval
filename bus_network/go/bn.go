@@ -15,35 +15,57 @@ var (
 	stops_re  = regexp.MustCompile(`R\d+=\[(.+)\]`)
 )
 
+const (
+	max_dist = 100000
+)
+
 type node struct {
 	route   uint8
 	label   uint
+	dist    uint
 	visited bool
 	childs  []*node
 }
 
 type graph struct {
-	first *node
+	nodes []*node
 }
 
 func newNode(route uint8, label uint) *node {
 	return &node{
 		route:   route,
 		label:   label,
+		dist:    max_dist,
 		visited: false,
 		childs:  make([]*node, 0)}
 }
 
 func newGraph() graph {
-	return graph{nil}
+	return graph{make([]*node, 0)}
 }
 
 func (g *graph) appendRoute(route uint8, stops []uint) {
-	if g.first == nil {
-		g.first = newNode(route, stops[0])
-		stops = stops[1:]
+	for _, v := range stops {
+		g.nodes = append(g.nodes, newNode(route, v))
 	}
+}
 
+func (g *graph) print() {
+	for _, v := range g.nodes {
+		fmt.Println(*v)
+	}
+}
+
+func (g *graph) connectNodes() {
+	for i, _ := range g.nodes {
+
+	}
+}
+
+func (g *graph) reset() {
+	for i, _ := range g.nodes {
+		g.nodes[i].dist = max_dist
+	}
 }
 
 func process(s string) {
@@ -77,6 +99,7 @@ func process(s string) {
 		}
 		g.appendRoute(uint8(i), stops_int)
 	}
+	g.print()
 	fmt.Println(start, stop)
 }
 
