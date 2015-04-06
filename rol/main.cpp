@@ -101,7 +101,8 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = NE;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
         ++r->steps;
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\' || 
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
@@ -114,7 +115,8 @@ void try_reflect(struct ray* r, char* room) {
         r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
         ++r->steps;
 
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\' || 
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
@@ -132,7 +134,8 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = NW;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
         ++r->steps;
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/' || 
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
@@ -144,7 +147,8 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = SE;
         r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
         ++r->steps;
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/' ||
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
@@ -162,7 +166,8 @@ void try_reflect(struct ray* r, char* room) {
         r->dir = SE;
         r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
         ++r->steps;
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/' || 
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
@@ -175,7 +180,8 @@ void try_reflect(struct ray* r, char* room) {
         r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
         ++r->steps;
 
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '/' || 
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '\\';
@@ -194,7 +200,8 @@ void try_reflect(struct ray* r, char* room) {
         r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
         ++r->steps;
 
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\' ||
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
@@ -207,7 +214,8 @@ void try_reflect(struct ray* r, char* room) {
         r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
         ++r->steps;
 
-        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\')
+        if (*at(room, r->cur_cell.row, r->cur_cell.col) == '\\' || 
+            *at(room, r->cur_cell.row, r->cur_cell.col) == 'X')
           *at(room, r->cur_cell.row, r->cur_cell.col) = 'X';
         else
           *at(room, r->cur_cell.row, r->cur_cell.col) = '/';
@@ -230,11 +238,11 @@ void try_split(struct ray* r, char* room) {
     case NW: {
 
       struct ray ray_SW;
-      init_ray2(&ray_SW, /*r->steps*/0, SW, r->cur_cell);
+      init_ray2(&ray_SW, r->steps, SW, r->cur_cell);
       advance(&ray_SW, room);
 
       struct ray ray_NE;
-      init_ray2(&ray_NE, /*r->steps*/0, NE, r->cur_cell);
+      init_ray2(&ray_NE, r->steps, NE, r->cur_cell);
       advance(&ray_NE, room);
 
     }
@@ -244,11 +252,11 @@ void try_split(struct ray* r, char* room) {
     case NE: {
 
       struct ray ray_SE;
-      init_ray2(&ray_SE, /*r->steps*/0, SE, r->cur_cell);
+      init_ray2(&ray_SE, r->steps, SE, r->cur_cell);
       advance(&ray_SE, room);
 
       struct ray ray_NW;
-      init_ray2(&ray_NW, /*r->steps*/0, NW, r->cur_cell);
+      init_ray2(&ray_NW, r->steps, NW, r->cur_cell);
       advance(&ray_NW, room);
 
     }
@@ -277,7 +285,7 @@ void try_split(struct ray* r, char* room) {
       break;
   };
 
-  r->steps = 0;
+  //r->steps = 0;
   advance(r, room);
 }
 
@@ -301,7 +309,7 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        //case '\\':
+        case '\\':
           *next = '\\';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
@@ -310,6 +318,14 @@ void advance(struct ray* r, char* room) {
           break;
         case 'o':
           break;
+        case 'X':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
+          ++r->steps;
+          advance(r, room);
+          break;
+
         case '#':
           try_reflect(r, room);
           break;
@@ -340,13 +356,21 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        //case '/':
+        case '/':
           *next = '/';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
           ++r->steps;
           advance(r, room);
           break;
+        case 'X':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col - 1);
+          ++r->steps;
+          advance(r, room);
+          break;
+
         case '#':
           try_reflect(r, room);
           break;
@@ -378,12 +402,21 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
+        case '/':
           *next = '/';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
           ++r->steps;
           advance(r, room);
           break;
+        case 'X':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row - 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+          ++r->steps;
+          advance(r, room);
+          break;
+
         case '#':
           try_reflect(r, room);
           break;
@@ -415,13 +448,21 @@ void advance(struct ray* r, char* room) {
 
       switch (*next) {
         case ' ':
-        //case '\\':
+        case '\\':
           *next = '\\';
           r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
           r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
           ++r->steps;
           advance(r, room);
           break;
+        case 'X':
+          *next = 'X';
+          r->cur_cell.row = (uint8_t)(r->cur_cell.row + 1);
+          r->cur_cell.col = (uint8_t)(r->cur_cell.col + 1);
+          ++r->steps;
+          advance(r, room);
+          break;
+
         case '#':
           try_reflect(r, room);
           break;
@@ -453,12 +494,12 @@ void process(char* room) {
   init_ray(room, &r);
   advance(&r, room);
 
-  for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
-   for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
-     printf("%-1c", room[i*ROOM_SIZE + j]);
-   }
-   printf("\n");
-  }
+  //for (uint8_t i = 0; i < ROOM_SIZE; ++i) {
+  // for (uint8_t j = 0; j < ROOM_SIZE; ++j) {
+  //   printf("%-1c", room[i*ROOM_SIZE + j]);
+  // }
+  // printf("\n");
+  //}
 
   for (uint8_t i = 0; i < ROOM_SIZE*ROOM_SIZE; ++i) {
     printf("%c", room[i]);
