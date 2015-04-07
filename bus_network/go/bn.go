@@ -140,7 +140,7 @@ func (g *graph) findMinNode() *node {
 	return retNode
 }
 
-func (g *graph) findAndRelaxSiblings(n *node) {
+func (g *graph) findAndRelaxSiblings(n *node, stop uint) bool {
 	// var i uint = 0
 	var j uint = g.matrix.size * n.index
 	for ; j < g.matrix.size*(n.index+1); j++ {
@@ -149,6 +149,11 @@ func (g *graph) findAndRelaxSiblings(n *node) {
 		}
 	}
 	n.visited = true
+
+	if n.label == stop {
+		return true
+	}
+	return false
 }
 
 func (g *graph) fillResults(stopLabel uint, results *[]uint) {
@@ -176,7 +181,9 @@ func (g *graph) findShortestPath(start, stop uint) {
 			if minNode == nil {
 				break
 			}
-			g.findAndRelaxSiblings(minNode)
+			if g.findAndRelaxSiblings(minNode, stop) {
+				break
+			}
 		}
 
 		g.fillResults(stop, &results)
