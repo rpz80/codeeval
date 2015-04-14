@@ -213,6 +213,19 @@ void calc_turnoffs(struct board* b) {
   printf("toggles: -1\n");
 }
 
+void calc2(struct board* b) {
+  uint32_t num_toggles = UINT32_MAX;
+  int found = 0;
+
+  if(!check_lights_off(b)) {
+
+  }
+  else {
+    printf("toggles: 0\n");
+    return;
+  }
+}
+
 void process(char* s) {
   enum pstate {
     row,
