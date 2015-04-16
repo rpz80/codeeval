@@ -28,14 +28,6 @@ void free_stringref(struct stringref* s) {
   free(s->begin);
   s->size = 0;
 }
-//struct stringref new_stringref_s(char* b, uint32_t size) {
-//  return (struct stringref){.begin = b, .size = size};
-//}
-//
-//struct stringref new_stringref_p(char* b, char* e) {
-//  return (struct stringref){.begin = b, .size = (e - b)};
-//}
-
 
 struct board {
   struct stringref* rows;
@@ -76,7 +68,7 @@ struct board* add_row_from_s(struct board* b, char** s) {
   while (**s == 'O' || **s == '.')
     ++*s;
 
-  new_row.size = *s - start;
+  new_row.size = (uint32_t)(*s - start);
   new_row.begin = calloc(new_row.size, sizeof(char));
   memcpy(new_row.begin, start, new_row.size);
 
@@ -185,7 +177,6 @@ void calc_turnoffs(struct board* b) {
   uint32_t num_toggles = UINT32_MAX;
   int found = 0;
 
-
   if (!check_lights_off(b)) {
     for (uint32_t i = 0; i < b->size; ++i) {
       for (uint32_t j = 0; j < b->rows[i].size; ++j) {
@@ -213,12 +204,32 @@ void calc_turnoffs(struct board* b) {
   printf("toggles: -1\n");
 }
 
+uint32_t turn_off_from_second_line(struct board* b) {
+  uint32_t row_size = b->rows[0].size;
+  uint32_t steps = 0;
+
+  for (uint32_t i = 1; i < b->size; ++i) {
+    for (uint32_t j = 0; j < row_size; ++j) {
+      if (*at(b, i - 1, j) == 'O') {
+        toggle_light(b, i, j);
+        ++steps;
+      }
+    }
+  }
+  return steps;
+}
+
+uint32_t calc_and_replace(struct board* b, uint32_t index, uint32_t steps) {
+  uint32_t toggles = UINT32_MAX;
+  struct board copy_b = copy_board(b);
+  
+
+  toggle_light(&copy_b, 0, index);
+}
+
 void calc2(struct board* b) {
-  uint32_t num_toggles = UINT32_MAX;
-  int found = 0;
-
-  if(!check_lights_off(b)) {
-
+  if (!check_lights_off(b)) {
+    printf("%u\n", calc_and_replace(b, 0, 0));
   }
   else {
     printf("toggles: 0\n");
@@ -257,7 +268,8 @@ void process(char* s) {
         while (*s != '\n' && *s != '\r' && *s)
           add_row_from_s(&b, &s);
         state = row;
-        calc_turnoffs(&b);
+        //calc_turnoffs(&b);
+        calc2(&b);
         free_board(&b);
       }
     }
