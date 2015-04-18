@@ -219,19 +219,45 @@ uint32_t turn_off_from_second_line(struct board* b) {
   return steps;
 }
 
-uint32_t calc_and_replace(struct board* b, uint32_t index, uint32_t steps) {
-  uint32_t toggles = UINT32_MAX;
-  struct board copy_b = copy_board(b);
-  
+int next_board(const struct board* b, uint32_t* steps) {
+  int found = 0;
+  uint32_t row_size = b->rows[0].size;
 
-  toggle_light(&copy_b, 0, index);
+  for (uint32_t i = row_size - 1; i >= 0; --i) {
+    if (b->rows[0].begin[i] == '.') {
+      b->rows[0].begin[i] = 'O';
+      ++*steps;
+      found = 1;
+
+      for (uint32_t j = i + 1; j < row_size; ++j) {
+        b->rows[0].begin[j] = '.';
+        ++*steps;
+      }
+      break;
+    }
+    if (i == 0)
+      break;
+  }
+
+  return found;
 }
 
 void calc2(struct board* b) {
+  uint32_t toggles = UINT32_MAX;
   if (!check_lights_off(b)) {
-    printf("%u\n", calc_and_replace(b, 0, 0));
+    struct board copy_b = copy_board(b);
+    uint32_t steps;
+    print_board(b);
+    printf("\n");
+    while (next_board(&copy_b, &steps)) {
+      print_board(&copy_b);
+      printf("\n");
+    }
+    free_board(&copy_b);
+    //printf("%u\n", calc_and_replace(b, 0, 0));
   }
-  else {
+  else
+  {
     printf("toggles: 0\n");
     return;
   }
