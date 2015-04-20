@@ -121,7 +121,8 @@ def find_shortest_path(g, start, stop):
             if len(siblings) != 0:
                 relax(siblings, g)
             mark_visited(n, g)
-
+            if g[n[0]][0][2] == stop:
+                break
         fill_results(stop, g, results)
     return results
 
