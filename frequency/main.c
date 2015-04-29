@@ -20,6 +20,12 @@ enum direction_type {
   no
 };
 
+enum wave_type {
+  square,
+  maybe_square,
+  other
+};
+
 static
 void process(char* data, const uint32_t size) {
   uint32_t count = 0;
@@ -27,6 +33,8 @@ void process(char* data, const uint32_t size) {
   int first_hit = 1;
   int tmp, local_peak=0, change_count=0;
   enum direction_type dir = no;
+  int max_peaks = 0, min_peaks = 0;
+  enum wave_type wt = other;
 
   for (uint32_t i = 0; i < size; ++i) {
     if (isdigit(*data) || *data == '-') {
@@ -38,24 +46,42 @@ void process(char* data, const uint32_t size) {
           local_peak = tmp;
         }
         else {
-          if (tmp - local_peak > 10) {
+          if (tmp - local_peak > 3) {
+            if (tmp - local_peak > 20) {
+              if (wt == other)
+                wt = maybe_square;
+              else if (wt == maybe_square)
+                wt = square;
+            }
+            else
+              wt = other;
             //printf("ascening\n");
             if (dir == no) {
               dir = ascending;
             }
             else if (dir == descending) {
+              ++min_peaks;
               dir = ascending;
               ++change_count;
             }
             local_peak = tmp;
           }
-          else if (local_peak - tmp > 10) {
+          else if (local_peak - tmp > 3) {
+            if (local_peak - tmp > 20) {
+              if (wt == other)
+                wt = maybe_square;
+              else if (wt == maybe_square)
+                wt = square;
+            }
+            else
+              wt = other;
             //printf("descending\n");
             if (dir == no) {
               dir = descending;
             }
             else if (dir == ascending) {
               dir = descending;
+              ++max_peaks;
               ++change_count;
             }
             local_peak = tmp;
@@ -63,9 +89,18 @@ void process(char* data, const uint32_t size) {
         }
         ++count;
         if (count % 2000 == 0) {
-          printf("change count: %u\n", 10*change_count/2);
+          int total_peaks = max_peaks > min_peaks ? max_peaks : min_peaks;
+          if (wt == square) {
+            printf("%u\n", 10*(total_peaks + 1));
+          }
+          else {
+            printf("%u\n", 10*(total_peaks));
+          }
           first_hit = 1;
           change_count = 0;
+          dir = no;
+          min_peaks = max_peaks = 0;
+          wt = other;
         }
       }
     }
@@ -74,8 +109,6 @@ void process(char* data, const uint32_t size) {
     }
     ++data;
   }
-  //printf("%s\n", data);
-  printf("Counted: %u\n", count);
 }
 
 int main(int argc, const char* argv[]) {
