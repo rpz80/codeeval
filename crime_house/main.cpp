@@ -86,6 +86,12 @@ namespace ch {
       case action_state::enter:
         if (index == 0) {
           ++buf_[index];
+          for (size_t i = 1; i < max_size; ++i) {
+            if (buf_[i] == -1) {
+              buf_[i] = 0;
+              break;
+            }
+          }
         } else {
           if (buf_[index] == 0 || buf_[index] == -1) {
             buf_[index] = 1;
@@ -97,7 +103,16 @@ namespace ch {
       case action_state::leave:
         if (index == 0) {
           if (buf_[index] > 0) {
-            --buf_[index];
+            bool found = false;
+            for (size_t i = 1; i < max_size; ++i) {
+              if (buf_[i] > 0) {
+                buf_[i] = 0;
+                found = true;
+                break;
+              }
+            }
+            if (!found)
+              --buf_[index];
           } else {
             for (size_t i = 1; i < max_size; ++i) {
               if (buf_[i] > 0) {
@@ -108,13 +123,14 @@ namespace ch {
           }
         } else {
           if (buf_[index] == 1) {
-            buf_[index] = 0;
+            buf_[index] = -1;
           } else if (buf_[index] == 0) {
-            //if (buf_[0] > 0) {
-            //  --buf_[0];
-            //} else {
-              --buf_[index];
-            //}
+            if (buf_[0] > 0) {
+              --buf_[0];
+              buf_[index] = -1;
+            } else {
+              buf_[index] = -1;
+            }
           } else if (buf_[index] == -1) {
             if (buf_[0] > 0) {
               --buf_[0];
